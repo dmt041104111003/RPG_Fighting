@@ -82,22 +82,12 @@ public class EnemyAI : MonoBehaviour
 
         Vector3 targetPosition = target.transform.position;
         Vector3 direction = (targetPosition - transform.position).normalized;
-        Vector3 meleePosition = targetPosition - direction * meleeDistance; 
-
-        while (Vector3.Distance(transform.position, meleePosition) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, meleePosition, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
-
+        Vector3 meleePosition = targetPosition - direction * meleeDistance;
+        transform.position = meleePosition;
         attackScript.Attack(target);
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(1f); 
 
-        while (Vector3.Distance(transform.position, originalPosition) > 0.1f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, originalPosition, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
+        transform.position = originalPosition;
     }
 
 }

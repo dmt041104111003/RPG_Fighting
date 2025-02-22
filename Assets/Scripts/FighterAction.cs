@@ -61,20 +61,11 @@ public class FighterAction : MonoBehaviour
         Vector3 targetPosition = target.transform.position;
         Vector3 direction = (targetPosition - hero.transform.position).normalized;
         Vector3 meleePosition = targetPosition - direction * meleeDistance;
-
-        while (Vector3.Distance(hero.transform.position, meleePosition) > 0.1f)
-        {
-            hero.transform.position = Vector3.MoveTowards(hero.transform.position, meleePosition, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
+        hero.transform.position = meleePosition;
 
         attackScript.Attack(target);
         yield return new WaitForSeconds(1f); 
 
-        while (Vector3.Distance(hero.transform.position, originalPosition) > 0.1f)
-        {
-            hero.transform.position = Vector3.MoveTowards(hero.transform.position, originalPosition, moveSpeed * Time.deltaTime);
-            yield return null;
-        }
+        hero.transform.position = originalPosition;
     }
 }
