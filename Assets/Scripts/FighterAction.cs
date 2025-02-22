@@ -20,6 +20,7 @@ public class FighterAction : MonoBehaviour
     private Vector3 originalPosition;
     public float moveSpeed = 5f;
     public float meleeDistance = 1.5f;
+    public float jumpHeight = 3f;
     public void Awake()
     {
         hero = GameObject.FindGameObjectWithTag("Hero");
@@ -57,6 +58,9 @@ public class FighterAction : MonoBehaviour
             Debug.Log("Not enough magic!");
             yield break;
         }
+        Vector3 jumpPosition = originalPosition + Vector3.up * jumpHeight;
+        hero.transform.position = jumpPosition;
+        yield return new WaitForSeconds(0.5f);
 
         Vector3 targetPosition = target.transform.position;
         Vector3 direction = (targetPosition - hero.transform.position).normalized;

@@ -5,21 +5,23 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     public GameObject[] attackPrefabs;
-    private FighterAction fighterAction;
+    private FighterStats fighterStats;
     private float attackCooldown = 3f; 
     private float attackCooldownTimer = 0f;
-    private bool canAttack = false;
-    private int attackTypeIndex = 0; // 0: Melee, 1: Range
+    private int attackTypeIndex;
     private GameObject hero;
     private Vector3 originalPosition;
     public float moveSpeed = 5f;
     public float meleeDistance = 1.5f;
+    private bool isAttacking;
     void Start()
     {
-        fighterAction = GetComponent<FighterAction>();
+        fighterStats = GetComponent<FighterStats>();
         hero = GameObject.FindGameObjectWithTag("Hero");
         originalPosition = transform.position;
         attackCooldownTimer = attackCooldown;
+        attackTypeIndex = 0;
+        isAttacking = false;
     }
 
     void Update()
@@ -34,46 +36,36 @@ public class EnemyAI : MonoBehaviour
 
             PerformAttack();
             attackCooldownTimer = 0f;
-   
+   isAttacking = false;
         }
     }
 
     void PerformAttack()
     {
 
-        if (attackPrefabs.Length > 0)
-        {
-            GameObject attackPrefab = attackPrefabs[attackTypeIndex];
-            if (attackPrefab != null)
-            {
-                AttackScript attackScript = attackPrefab.GetComponent<AttackScript>();
-                float magicCost = attackScript.magicCost;
-                bool magicAttack = attackScript.magicAttack;
-                FighterStats grantEnemyStats = GetComponent<FighterStats>();
-               
-                if (grantEnemyStats.magic >= magicCost)
-                {
-                    if (attackTypeIndex == 0) // Melee attack
-                    {
-                        StartCoroutine(MeleeAttackSequence(attackScript, hero));
-                    }
-                    else if (attackTypeIndex == 1) // Range attack
-                    {
-                        attackScript.Attack(hero);
-                    }
-                    //grantEnemyStats.updateMagicFill(magicCost);
+        if (attackPrefabs.Length == 0 || isAttacking) return;
 
-                    attackTypeIndex = (attackTypeIndex + 1) % 2;
-                }
-                else
-                {
-                    attackTypeIndex = (attackTypeIndex + 1) % 2; 
-                }
+        isAttacking = true;
+        GameObject attackPrefab = attackPrefabs[attackTypeIndex];
+        AttackScript attackScript = attackPrefab.GetComponent<AttackScript>();
+
+        if (fighterStats.magic >= attackScript.magicCost)
+        {
+            if (attackTypeIndex == 0)
+            {
+                StartCoroutine(MeleeAttackSequence(attackScript, hero));
             }
             else
             {
-        
+                attackScript.Attack(hero);
+                isAttacking = false;
             }
+            attackTypeIndex = (attackTypeIndex + 1) % 2;
+        }
+        else
+        {
+            attackTypeIndex = (attackTypeIndex + 1) % 2;
+            isAttacking = false;
         }
     }
 
@@ -88,6 +80,7 @@ public class EnemyAI : MonoBehaviour
         yield return new WaitForSeconds(1f); 
 
         transform.position = originalPosition;
+        isAttacking = false;
     }
 
 }
