@@ -807,8 +807,8 @@ GameObject:
   m_Component:
   - component: {fileID: 570582298}
   - component: {fileID: 570582297}
-  - component: {fileID: 570582301}
   - component: {fileID: 570582300}
+  - component: {fileID: 570582301}
   - component: {fileID: 570582299}
   - component: {fileID: 570582302}
   m_Layer: 0
@@ -941,7 +941,7 @@ MonoBehaviour:
   health: 100
   magicRange: 25
   melee: 12
-  magic: 25
+  magic: 50
   defense: 5
   range: 5
   speed: 15
@@ -962,6 +962,8 @@ MonoBehaviour:
   attackPrefabs:
   - {fileID: 417011326}
   - {fileID: 2003303866}
+  moveSpeed: 5
+  meleeDistance: 1.5
 --- !u!1 &633201882
 GameObject:
   m_ObjectHideFlags: 0

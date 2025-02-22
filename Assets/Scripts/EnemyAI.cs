@@ -11,11 +11,14 @@ public class EnemyAI : MonoBehaviour
     private bool canAttack = false;
     private int attackTypeIndex = 0; // 0: Melee, 1: Range
     private GameObject hero;
-
+    private Vector3 originalPosition;
+    public float moveSpeed = 5f;
+    public float meleeDistance = 1.5f;
     void Start()
     {
         fighterAction = GetComponent<FighterAction>();
         hero = GameObject.FindGameObjectWithTag("Hero");
+        originalPosition = transform.position;
         attackCooldownTimer = attackCooldown;
     }
 
@@ -47,25 +50,18 @@ public class EnemyAI : MonoBehaviour
                 float magicCost = attackScript.magicCost;
                 bool magicAttack = attackScript.magicAttack;
                 FighterStats grantEnemyStats = GetComponent<FighterStats>();
-                Debug.Log("<color=blue>EnemyAI - PerformAttack - Attack Type: " + (attackTypeIndex == 0 ? "Melee" : "Range") + ", Magic Cost: " + magicCost + ", magicAttack: " + magicAttack + "</color>");
-                Debug.Log("GrantEnemy Magic BEFORE attack: " + grantEnemyStats.magic);
-                Debug.Log("Attack Type: " + (attackTypeIndex == 0 ? "Melee" : "Range") + ", Magic Cost: " + magicCost);
-
+               
                 if (grantEnemyStats.magic >= magicCost)
                 {
-                    if (attackTypeIndex == 0)
+                    if (attackTypeIndex == 0) // Melee attack
+                    {
+                        StartCoroutine(MeleeAttackSequence(attackScript, hero));
+                    }
+                    else if (attackTypeIndex == 1) // Range attack
                     {
                         attackScript.Attack(hero);
-        
                     }
-                    else if (attackTypeIndex == 1)
-                    {
-                        attackScript.Attack(hero);
-                  
-                    }
-                    grantEnemyStats.updateMagicFill(magicCost);
-
-                    Debug.Log("GrantEnemy Magic AFTER attack: " + grantEnemyStats.magic);
+                    //grantEnemyStats.updateMagicFill(magicCost);
 
                     attackTypeIndex = (attackTypeIndex + 1) % 2;
                 }
@@ -78,6 +74,29 @@ public class EnemyAI : MonoBehaviour
             {
         
             }
+        }
+    }
+
+    private IEnumerator MeleeAttackSequence(AttackScript attackScript, GameObject target)
+    {
+
+        Vector3 targetPosition = target.transform.position;
+        Vector3 direction = (targetPosition - transform.position).normalized;
+        Vector3 meleePosition = targetPosition - direction * meleeDistance; 
+
+        while (Vector3.Distance(transform.position, meleePosition) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, meleePosition, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
+
+        attackScript.Attack(target);
+        yield return new WaitForSeconds(1f);
+
+        while (Vector3.Distance(transform.position, originalPosition) > 0.1f)
+        {
+            transform.position = Vector3.MoveTowards(transform.position, originalPosition, moveSpeed * Time.deltaTime);
+            yield return null;
         }
     }
 

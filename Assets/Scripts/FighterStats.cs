@@ -80,9 +80,10 @@ public class FighterStats : MonoBehaviour, IComparable
         nextActTurn = currentTurn + Mathf.CeilToInt(100f / speed);
     }
 
+    private int magicDeductionCount = 0;
     public void updateMagicFill(float cost)
     {
-        
+        magicDeductionCount++;
         magic = magic - cost;
         xNewMagicScale = magicScale.x * (magic / startMagic);
         magicFill.transform.localScale = new Vector2(xNewMagicScale, magicScale.y);
