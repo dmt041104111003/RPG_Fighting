@@ -46,25 +46,33 @@ public class EnemyAI : MonoBehaviour
         if (attackPrefabs.Length == 0 || isAttacking) return;
 
         isAttacking = true;
+        float distanceToHero = Vector3.Distance(transform.position, hero.transform.position);
         GameObject attackPrefab = attackPrefabs[attackTypeIndex];
         AttackScript attackScript = attackPrefab.GetComponent<AttackScript>();
 
-        if (fighterStats.magic >= attackScript.magicCost)
+        if (distanceToHero <= 5f && fighterStats.magic >= attackPrefabs[0].GetComponent<AttackScript>().magicCost)
         {
-            if (attackTypeIndex == 0)
-            {
-                StartCoroutine(MeleeAttackSequence(attackScript, hero));
-            }
-            else
-            {
-                attackScript.Attack(hero);
-                isAttacking = false;
-            }
-            attackTypeIndex = (attackTypeIndex + 1) % 2;
+            attackPrefab = attackPrefabs[0];
+            attackTypeIndex = 0;
+        }
+        else if (fighterStats.magic >= attackPrefabs[1].GetComponent<AttackScript>().magicCost)
+        {
+            attackPrefab = attackPrefabs[1];
+            attackTypeIndex = 1;
         }
         else
         {
-            attackTypeIndex = (attackTypeIndex + 1) % 2;
+            isAttacking = false;
+            return; 
+        }
+
+        if (attackTypeIndex == 0)
+        {
+            StartCoroutine(MeleeAttackSequence(attackScript, hero));
+        }
+        else
+        {
+            attackScript.Attack(hero);
             isAttacking = false;
         }
     }
