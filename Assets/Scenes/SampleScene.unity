@@ -923,6 +923,9 @@ MonoBehaviour:
   meleePrefab: {fileID: 417011326}
   rangePrefab: {fileID: 2003303866}
   faceIcon: {fileID: 0}
+  moveSpeed: 5
+  meleeDistance: 1.5
+  jumpHeight: 3
 --- !u!114 &570582301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -956,14 +959,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 570582296}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99658d5edce0acf4eb6ec032b7971d8d, type: 3}
+  m_Script: {fileID: 11500000, guid: 0d963110cac05b94cbda1d15fc19954e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  attackPrefabs:
-  - {fileID: 417011326}
-  - {fileID: 2003303866}
-  moveSpeed: 5
-  meleeDistance: 1.5
+  agentParameters:
+    maxStep: 0
+  hasUpgradedFromAgentParameters: 1
+  MaxStep: 0
 --- !u!1 &633201882
 GameObject:
   m_ObjectHideFlags: 0
@@ -1980,6 +1982,9 @@ MonoBehaviour:
   meleePrefab: {fileID: 859416077}
   rangePrefab: {fileID: 464482113}
   faceIcon: {fileID: 21300000, guid: 69b8335a641f8d14891b69ed0b9f6790, type: 3}
+  moveSpeed: 5
+  meleeDistance: 1.5
+  jumpHeight: 3
 --- !u!212 &1143236527
 SpriteRenderer:
   m_ObjectHideFlags: 0
