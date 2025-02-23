@@ -1,19 +1,20 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+
 namespace Core.Scripts
 {
     public class FighterStats : MonoBehaviour, IComparable
     {
-        [SerializeField]
+        [SerializeField] 
         protected Animator animator;
-        [SerializeField]
+        [SerializeField] 
         protected GameObject healthFill;
-        [SerializeField]
+        [SerializeField] 
         protected GameObject magicFill;
-        [SerializeField]
+        [SerializeField] 
         protected Text healthText;
-        [SerializeField]
+        [SerializeField] 
         protected Text magicText;
 
         [Header("Stats")]
@@ -37,22 +38,37 @@ namespace Core.Scripts
         protected Vector2 magicScale;
         protected float xNewHealthScale;
         protected float xNewMagicScale;
+        protected bool uiDirty = false;
 
         protected virtual void Start()
         {
-            healthTransform = healthFill.GetComponent<RectTransform>();
-            healthScale = healthFill.transform.localScale;
-            magicTransform = magicFill.GetComponent<RectTransform>();
-            magicScale = magicFill.transform.localScale;
-            startHealth = health;
-            startMagic = magic;
+            healthTransform = healthFill?.GetComponent<RectTransform>();
+            healthScale = healthFill != null ? healthFill.transform.localScale : Vector2.one;
+            magicTransform = magicFill?.GetComponent<RectTransform>();
+            magicScale = magicFill != null ? magicFill.transform.localScale : Vector2.one;
+
+            startHealth = Mathf.Max(1f, health);
+            startMagic = Mathf.Max(1f, magic);
+
+
+
+
             UpdateUI();
+        }
+
+        protected void Update()
+        {
+            if (uiDirty)
+            {
+                UpdateUI();
+                uiDirty = false;
+            }
         }
 
         public virtual void ReceiveDamage(float damage)
         {
             health -= damage;
-            animator.Play("Damage");
+            animator?.Play("Damage");
 
             if (health <= 0)
             {
@@ -64,8 +80,11 @@ namespace Core.Scripts
             else
             {
                 xNewHealthScale = healthScale.x * (health / startHealth);
-                healthFill.transform.localScale = new Vector2(xNewHealthScale, healthScale.y);
-                UpdateUI();
+                if (healthFill != null)
+                {
+                    healthFill.transform.localScale = new Vector2(xNewHealthScale, healthScale.y);
+                }
+                uiDirty = true;
             }
         }
 
@@ -76,13 +95,34 @@ namespace Core.Scripts
 
         public virtual void UpdateMagicFill(float cost)
         {
-            magic -= cost;
-            xNewMagicScale = magicScale.x * (magic / startMagic);
-            magicFill.transform.localScale = new Vector2(xNewMagicScale, magicScale.y);
-            UpdateUI();
+            if (cost < 0)
+            {
+                return;
+            }
+
+            magic = Mathf.Max(0, magic - cost);
+
+            if (magicFill != null && startMagic > 0)
+            {
+                float magicRatio = magic / startMagic;
+                if (float.IsNaN(magicRatio) || float.IsInfinity(magicRatio))
+                {
+                    magicRatio = 0;
+                }
+
+                xNewMagicScale = magicScale.x * magicRatio;
+                magicFill.transform.localScale = new Vector2(xNewMagicScale, magicScale.y);
+            }
+
+            uiDirty = true;
         }
 
-        protected virtual void UpdateUI()
+        public bool CanUseSkill(float magicCost)
+        {
+            return magic >= magicCost;
+        }
+
+        protected void UpdateUI()
         {
             if (healthText != null)
             {

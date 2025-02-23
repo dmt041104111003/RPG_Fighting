@@ -1,47 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
 using UnityEngine.UI;
 
 namespace Gameplay.Scripts
 {
-    using Core.Scripts;
-    
     public class MakeButton : MonoBehaviour
     {
-        [SerializeField]
+        [SerializeField] 
         private bool physical;
         private GameObject hero;
 
+        private enum ButtonType { Melee, Range, Run }
 
         void Start()
         {
-            string temp = gameObject.name;
-            gameObject.GetComponent<Button>().onClick.AddListener(() => AttachCallback(temp));
-
             hero = GameObject.FindGameObjectWithTag("Hero");
+            string buttonName = gameObject.name;
+            gameObject.GetComponent<Button>().onClick.AddListener(() => AttachCallback(buttonName));
         }
-
 
         private void AttachCallback(string btn)
         {
-            if (btn.CompareTo("MeleeBtn") == 0)
+            ButtonType type = btn switch
             {
-                hero.GetComponent<FighterAction>().SelectAttack("melee");
-
-            }
-            else if (btn.CompareTo("RangeBtn") == 0)
-            {
-                hero.GetComponent<FighterAction>().SelectAttack("range");
-
-            }
-            else
-            {
-                hero.GetComponent<FighterAction>().SelectAttack("run");
-
-            }
+                "MeleeBtn" => ButtonType.Melee,
+                "RangeBtn" => ButtonType.Range,
+                _ => ButtonType.Run
+            };
+            hero.GetComponent<FighterAction>().SelectAttack(type.ToString().ToLower());
         }
     }
 }

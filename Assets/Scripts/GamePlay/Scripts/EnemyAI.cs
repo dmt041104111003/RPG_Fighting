@@ -1,10 +1,10 @@
-﻿using System.Collections;
-using UnityEngine;
-using UnityEngine.SocialPlatforms.Impl;
+﻿using UnityEngine;
+using System.Collections;
 
 namespace Gameplay.Scripts
 {
     using Core.Scripts;
+
     public class EnemyAI : MonoBehaviour
     {
         public GameObject[] attackPrefabs; // 0: Melee, 1: Range
@@ -14,24 +14,21 @@ namespace Gameplay.Scripts
 
         public float meleeDistance = 1.5f;
         public float attackCooldown = 3f;
-        private float attackCooldownTimer = 0f;
 
         void Start()
         {
             enemyStats = GetComponent<FighterStats>();
             hero = GameObject.FindGameObjectWithTag("Hero");
             originalPosition = transform.position;
-            attackCooldownTimer = attackCooldown;
+            StartCoroutine(AttackRoutine());
         }
 
-        void Update()
+        IEnumerator AttackRoutine()
         {
-            attackCooldownTimer += Time.deltaTime;
-
-            if (attackCooldownTimer >= attackCooldown)
+            while (true)
             {
                 PerformGreedyAttack();
-                attackCooldownTimer = 0f;
+                yield return new WaitForSeconds(attackCooldown);
             }
         }
 
@@ -68,7 +65,6 @@ namespace Gameplay.Scripts
 
         float CalculateAttackScore(AttackScript attack, float distance, FighterStats targetStats)
         {
-
             float avgAttackMultiplier = (attack.minAttackMultiplier + attack.maxAttackMultiplier) / 2f;
             float avgDefenseMultiplier = (attack.minDefenseMultiplier + attack.maxDefenseMultiplier) / 2f;
 
@@ -88,24 +84,13 @@ namespace Gameplay.Scripts
                 StartCoroutine(MeleeAttackSequence(attackScript, target));
             else
                 attackScript.Attack(target);
-
         }
 
         private IEnumerator MeleeAttackSequence(AttackScript attackScript, GameObject target)
         {
-            Vector3 targetPosition = target.transform.position;
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            Vector3 meleePosition = new Vector3(
-                targetPosition.x - direction.x * meleeDistance,
-                transform.position.y,
-                targetPosition.z - direction.z * meleeDistance
-            );
-
-            transform.position = meleePosition;
+            yield return CombatUtils.MoveToMeleePosition(transform, target.transform, meleeDistance);
             attackScript.Attack(target);
-
             yield return new WaitForSeconds(1f);
-            //transform.position = originalPosition;
         }
     }
 }
