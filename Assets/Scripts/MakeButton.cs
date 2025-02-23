@@ -35,7 +35,7 @@ public class MakeButton : MonoBehaviour
         else
         {
             hero.GetComponent<FighterAction>().SelectAttack("run");
-    
+
         }
     }
 }

@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 public class FighterAction : MonoBehaviour
 {
-    // Start is called before the first frame update
     private GameObject hero;
     private GameObject enemy;
     [SerializeField]
@@ -41,45 +40,46 @@ public class FighterAction : MonoBehaviour
     public void SelectAttack(string btn)
     {
         GameObject victim = (tag == "Hero") ? enemy : hero;
-        if (tag == "Hero")
+
+        AttackScript attackScript = null;
+        if (btn.CompareTo("melee") == 0)
         {
-            victim = enemy;
+            attackScript = meleePrefab?.GetComponent<AttackScript>();
+        }
+        else if (btn.CompareTo("range") == 0)
+        {
+            attackScript = rangePrefab?.GetComponent<AttackScript>();
+        }
+        else if (btn.CompareTo("run") == 0)
+        {
+            attackScript = null;
+        }
+
+        FighterStats heroStats = hero.GetComponent<FighterStats>();
+        if (!CanUseSkill(attackScript, heroStats))
+        {
+            ShowNotification("Not Enough Magic!");
+            return;
         }
 
         if (btn.CompareTo("melee") == 0)
         {
-            AttackScript attackScript = rangePrefab.GetComponent<AttackScript>();
-            FighterStats heroStats = hero.GetComponent<FighterStats>();
-            if (heroStats.magic < attackScript.magicCost)
-            {
-                ShowNotification("Not Enough Magic!");
-                return;
-            }            
-            StartCoroutine(MeleeAttackSequence(meleePrefab.GetComponent<AttackScript>(), victim));
-
+            StartCoroutine(MeleeAttackSequence(attackScript, victim));
         }
         else if (btn.CompareTo("range") == 0)
         {
-            AttackScript attackScript = rangePrefab.GetComponent<AttackScript>();
-            FighterStats heroStats = hero.GetComponent<FighterStats>();
-            
-            if (heroStats.magic < attackScript.magicCost)
-            {
-                ShowNotification("Not Enough Magic!");
-                return;
-            }
-            rangePrefab.GetComponent<AttackScript>().Attack(victim);
+            attackScript.Attack(victim);
         }
-        else
+        else if (btn.CompareTo("run") == 0)
         {
-            Debug.Log("Run");
+            StartCoroutine(RunSequence());
         }
     }
     private void ShowNotification(string message)
     {
         if (notificationText != null)
         {
-  
+
             if (activeNotificationCoroutine != null)
             {
                 StopCoroutine(activeNotificationCoroutine);
@@ -123,23 +123,51 @@ public class FighterAction : MonoBehaviour
     private IEnumerator MeleeAttackSequence(AttackScript attackScript, GameObject target)
     {
         FighterStats heroStats = hero.GetComponent<FighterStats>();
-        if (heroStats.magic < attackScript.magicCost)
+        if (!CanUseSkill(attackScript, heroStats))
         {
             Debug.Log("Not enough magic!");
             yield break;
         }
-        Vector3 jumpPosition = originalPosition + Vector3.up * jumpHeight;
-        hero.transform.position = jumpPosition;
-        yield return new WaitForSeconds(0.5f);
-
         Vector3 targetPosition = target.transform.position;
+        float distanceToTarget = Vector3.Distance(hero.transform.position, targetPosition);
+
         Vector3 direction = (targetPosition - hero.transform.position).normalized;
-        Vector3 meleePosition = targetPosition - direction * meleeDistance;
+        Vector3 meleePosition = new Vector3(
+            targetPosition.x - direction.x * meleeDistance,
+            hero.transform.position.y,
+            targetPosition.z - direction.z * meleeDistance
+        );
+
         hero.transform.position = meleePosition;
 
         attackScript.Attack(target);
-        yield return new WaitForSeconds(1f); 
+        yield return new WaitForSeconds(1f);
 
-        hero.transform.position = originalPosition;
+    }
+    private bool CanUseSkill(AttackScript attackScript, FighterStats heroStats)
+    {
+        if (attackScript == null) return true;
+
+        float currentMagic = heroStats.magic;
+        float requiredMagic = attackScript.magicCost;
+
+        return currentMagic >= requiredMagic;
+    }
+    private IEnumerator RunSequence()
+    {
+        FighterStats heroStats = hero.GetComponent<FighterStats>();
+        AttackScript attackScript = null;
+        if (!CanUseSkill(attackScript, heroStats))
+        {
+            ShowNotification("Not Enough Magic!");
+            yield break;
+        }
+
+        Vector3 runPosition = originalPosition + Vector3.back * 5f;
+        while (Vector3.Distance(hero.transform.position, runPosition) > 0.1f)
+        {
+            hero.transform.position = Vector3.MoveTowards(hero.transform.position, runPosition, moveSpeed * Time.deltaTime);
+            yield return null;
+        }
     }
 }

@@ -80,23 +80,27 @@ public class EnemyAI : MonoBehaviour
     void ExecuteAttack(int attackIndex, GameObject target)
     {
         AttackScript attackScript = attackPrefabs[attackIndex].GetComponent<AttackScript>();
-        if (attackIndex == 0) 
+        if (attackIndex == 0)
             StartCoroutine(MeleeAttackSequence(attackScript, target));
-        else 
+        else
             attackScript.Attack(target);
-        
+
     }
 
     private IEnumerator MeleeAttackSequence(AttackScript attackScript, GameObject target)
     {
         Vector3 targetPosition = target.transform.position;
         Vector3 direction = (targetPosition - transform.position).normalized;
-        Vector3 meleePosition = targetPosition - direction * meleeDistance;
+        Vector3 meleePosition = new Vector3(
+            targetPosition.x - direction.x * meleeDistance,
+            transform.position.y,
+            targetPosition.z - direction.z * meleeDistance
+        );
 
         transform.position = meleePosition;
         attackScript.Attack(target);
 
         yield return new WaitForSeconds(1f);
-        transform.position = originalPosition;
+        //transform.position = originalPosition;
     }
 }
