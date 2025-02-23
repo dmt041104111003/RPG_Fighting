@@ -17,16 +17,16 @@ public class AttackScript : MonoBehaviour
     public float magicCost;
 
     [SerializeField]
-    private float minAttackMultiplier;
+    public float minAttackMultiplier;
 
     [SerializeField]
-    private float maxAttackMultiplier;
+    public float maxAttackMultiplier;
 
     [SerializeField]
-    private float minDefenseMultiplier;
+    public float minDefenseMultiplier;
 
     [SerializeField]
-    private float maxDefenseMultiplier;
+    public float maxDefenseMultiplier;
 
     private FighterStats attackerStats;
     private FighterStats targetStats;

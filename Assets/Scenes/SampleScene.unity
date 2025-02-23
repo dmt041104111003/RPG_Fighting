@@ -810,7 +810,7 @@ GameObject:
   - component: {fileID: 570582300}
   - component: {fileID: 570582301}
   - component: {fileID: 570582299}
-  - component: {fileID: 570582302}
+  - component: {fileID: 570582303}
   m_Layer: 0
   m_Name: GrantEnemy
   m_TagString: Enemy
@@ -950,7 +950,7 @@ MonoBehaviour:
   speed: 15
   experience: 0
   nextActTurn: 0
---- !u!114 &570582302
+--- !u!114 &570582303
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -959,13 +959,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 570582296}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0d963110cac05b94cbda1d15fc19954e, type: 3}
+  m_Script: {fileID: 11500000, guid: 99658d5edce0acf4eb6ec032b7971d8d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentParameters:
-    maxStep: 0
-  hasUpgradedFromAgentParameters: 1
-  MaxStep: 0
+  attackPrefabs:
+  - {fileID: 417011326}
+  - {fileID: 2003303866}
+  meleeDistance: 1.5
 --- !u!1 &633201882
 GameObject:
   m_ObjectHideFlags: 0
