@@ -15,7 +15,10 @@ public class FighterAction : MonoBehaviour
 
     [SerializeField]
     private Sprite faceIcon;
-
+    [SerializeField]
+    private Text notificationText;
+    private Vector2 initialTextPosition;
+    private Coroutine activeNotificationCoroutine;
     private GameObject currentAttack;
     private Vector3 originalPosition;
     public float moveSpeed = 5f;
@@ -27,7 +30,14 @@ public class FighterAction : MonoBehaviour
         enemy = GameObject.FindGameObjectWithTag("Enemy");
         originalPosition = hero.transform.position;
     }
-
+    public void Start()
+    {
+        if (notificationText != null)
+        {
+            initialTextPosition = notificationText.GetComponent<RectTransform>().anchoredPosition;
+            notificationText.gameObject.SetActive(false);
+        }
+    }
     public void SelectAttack(string btn)
     {
         GameObject victim = (tag == "Hero") ? enemy : hero;
@@ -38,10 +48,26 @@ public class FighterAction : MonoBehaviour
 
         if (btn.CompareTo("melee") == 0)
         {
+            AttackScript attackScript = rangePrefab.GetComponent<AttackScript>();
+            FighterStats heroStats = hero.GetComponent<FighterStats>();
+            if (heroStats.magic < attackScript.magicCost)
+            {
+                ShowNotification("Not Enough Magic!");
+                return;
+            }            
             StartCoroutine(MeleeAttackSequence(meleePrefab.GetComponent<AttackScript>(), victim));
+
         }
         else if (btn.CompareTo("range") == 0)
         {
+            AttackScript attackScript = rangePrefab.GetComponent<AttackScript>();
+            FighterStats heroStats = hero.GetComponent<FighterStats>();
+            
+            if (heroStats.magic < attackScript.magicCost)
+            {
+                ShowNotification("Not Enough Magic!");
+                return;
+            }
             rangePrefab.GetComponent<AttackScript>().Attack(victim);
         }
         else
@@ -49,7 +75,51 @@ public class FighterAction : MonoBehaviour
             Debug.Log("Run");
         }
     }
+    private void ShowNotification(string message)
+    {
+        if (notificationText != null)
+        {
+  
+            if (activeNotificationCoroutine != null)
+            {
+                StopCoroutine(activeNotificationCoroutine);
+                notificationText.gameObject.SetActive(false);
+            }
 
+            RectTransform textTransform = notificationText.GetComponent<RectTransform>();
+            textTransform.anchoredPosition = initialTextPosition;
+            notificationText.text = message;
+            notificationText.color = new Color(notificationText.color.r, notificationText.color.g, notificationText.color.b, 1f);
+            notificationText.gameObject.SetActive(true);
+
+            activeNotificationCoroutine = StartCoroutine(FloatingFadeNotification(2f));
+        }
+    }
+    private IEnumerator FloatingFadeNotification(float duration)
+    {
+        RectTransform textTransform = notificationText.GetComponent<RectTransform>();
+        Color originalColor = notificationText.color;
+        Vector3 startPosition = textTransform.anchoredPosition;
+        float elapsedTime = 0f;
+        float floatDistance = 50f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float progress = elapsedTime / duration;
+
+            float newY = startPosition.y + floatDistance * progress;
+            textTransform.anchoredPosition = new Vector2(startPosition.x, newY);
+
+            notificationText.color = new Color(originalColor.r, originalColor.g, originalColor.b, 1f - progress);
+
+            yield return null;
+        }
+
+        notificationText.color = originalColor;
+        textTransform.anchoredPosition = startPosition;
+        notificationText.gameObject.SetActive(false);
+    }
     private IEnumerator MeleeAttackSequence(AttackScript attackScript, GameObject target)
     {
         FighterStats heroStats = hero.GetComponent<FighterStats>();

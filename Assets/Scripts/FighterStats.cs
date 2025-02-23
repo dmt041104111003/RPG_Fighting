@@ -1,50 +1,43 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class FighterStats : MonoBehaviour, IComparable
 {
-
-    [SerializeField]
+    [SerializeField] 
     private Animator animator;
-
-    [SerializeField]
+    [SerializeField] 
     private GameObject healthFill;
-
-    [SerializeField]
+    [SerializeField] 
     private GameObject magicFill;
+    [SerializeField] 
+    private Text healthText; 
+    [SerializeField] 
+    private Text magicText;
 
     [Header("Stats")]
-
     private bool dead = false;
     public float health;
-
     public float magicRange;
     public float melee;
     public float magic;
     public float defense;
     public float range;
-
     public float speed;
     public float experience;
 
     private float startHealth;
     private float startMagic;
-    [HideInInspector]
-    public int nextActTurn;
+    [HideInInspector] public int nextActTurn;
 
-    // Resize health and magic bar
+
     private Transform healthTransform;
     private Transform magicTransform;
-
     private Vector2 healthScale;
     private Vector2 magicScale;
-
     private float xNewHealthScale;
     private float xNewMagicScale;
 
-  
     private void Start()
     {
         healthTransform = healthFill.GetComponent<RectTransform>();
@@ -53,13 +46,13 @@ public class FighterStats : MonoBehaviour, IComparable
         magicScale = magicFill.transform.localScale;
         startHealth = health;
         startMagic = magic;
+        UpdateHealth_MagicUI();
     }
+
     public void ReceiveDamage(float damage)
     {
-        health = health - damage;
+        health -= damage;
         animator.Play("Damage");
-
-        // Set damage text
 
         if (health <= 0)
         {
@@ -72,6 +65,7 @@ public class FighterStats : MonoBehaviour, IComparable
         {
             xNewHealthScale = healthScale.x * (health / startHealth);
             healthFill.transform.localScale = new Vector2(xNewHealthScale, healthScale.y);
+            UpdateHealth_MagicUI();
         }
     }
 
@@ -80,21 +74,33 @@ public class FighterStats : MonoBehaviour, IComparable
         nextActTurn = currentTurn + Mathf.CeilToInt(100f / speed);
     }
 
-    private int magicDeductionCount = 0;
-    public void updateMagicFill(float cost)
+    public void UpdateMagicFill(float cost)
     {
-        magicDeductionCount++;
-        magic = magic - cost;
+        magic -= cost;
         xNewMagicScale = magicScale.x * (magic / startMagic);
         magicFill.transform.localScale = new Vector2(xNewMagicScale, magicScale.y);
+        UpdateHealth_MagicUI();
     }
+
+    private void UpdateHealth_MagicUI()
+    {
+        if (healthText != null)
+        {
+            healthText.text = $"{health:F0}/{startHealth:F0}";
+        }
+        if (magicText != null)
+        {
+            magicText.text = $"{magic:F0}/{startMagic:F0}";
+        }
+    }
+
     public bool GetDead()
     {
         return dead;
     }
+
     public int CompareTo(object otherStats)
     {
-        int nex = nextActTurn.CompareTo(((FighterStats)otherStats).nextActTurn);
-        return nex;
+        return nextActTurn.CompareTo(((FighterStats)otherStats).nextActTurn);
     }
 }

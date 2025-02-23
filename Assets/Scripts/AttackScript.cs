@@ -35,7 +35,7 @@ public class AttackScript : MonoBehaviour
     private float xMagicNewScale;
 
     private Vector2 magicScale;
-    // Start is called before the first frame update
+
     void Start()
     {
         magicScale = GameObject.Find("HeroMagicFill").GetComponent<RectTransform>().localScale;
@@ -51,7 +51,7 @@ public class AttackScript : MonoBehaviour
         if (attackerStats.magic >= magicCost)
         {
 
-            attackerStats.updateMagicFill(magicCost);
+            attackerStats.UpdateMagicFill(magicCost);
 
 
             float multiplier = Random.Range(minAttackMultiplier, maxAttackMultiplier);
